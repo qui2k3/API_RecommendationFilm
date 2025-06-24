@@ -1,0 +1,9 @@
+Flask
+gunicorn # Web server cho Flask production
+requests
+pandas
+scikit-learn
+firebase-admin
+flask-cors
+unidecode
+google-cloud-firestore # Để đảm bảo cài đúng thư viện Firestore client
