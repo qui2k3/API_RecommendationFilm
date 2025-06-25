@@ -12,6 +12,7 @@ import os
 import json
 from datetime import datetime, timedelta 
 
+from sklearn.metrics.pairwise import cosine_similarity 
 
 app = Flask(__name__)
 # Cấu hình CORS: Cho phép ứng dụng React của bạn gọi API.
