@@ -1,5 +1,3 @@
-# app.py (File này sẽ được triển khai lên Render.com)
-
 import requests
 import pandas as pd
 from flask import Flask, request, jsonify
@@ -11,13 +9,10 @@ from unidecode import unidecode
 import os 
 import json
 from datetime import datetime, timedelta 
-
 from sklearn.metrics.pairwise import cosine_similarity 
 
 app = Flask(__name__)
 # Cấu hình CORS: Cho phép ứng dụng React của bạn gọi API.
-# Trong môi trường production, hãy thay thế "*" bằng domain của React app của bạn.
-# Ví dụ: CORS(app, origins=["https://your-react-app-domain.com", "http://localhost:5173"])
 CORS(app) 
 
 # --- Cấu hình Firebase Admin SDK cho môi trường triển khai ---
@@ -123,7 +118,7 @@ def load_movies_from_firestore_and_build_model(collection_name='enrichedMovies')
     return ALL_MOVIES_DF
 
 # --- Hàm Gợi ý phim Content-Based Filtering ---
-def recommend_movies_content_based(user_id, top_n=10, min_watch_duration_seconds=60, max_movies_for_profile=50): 
+def recommend_movies_content_based(user_id, top_n=10, min_watch_duration_seconds=10, max_movies_for_profile=3): 
     """
     Gợi ý phim dựa trên nội dung đã xem của người dùng.
     Chỉ lấy các phim có thời gian xem nhiều nhất để tính toán hồ sơ sở thích.
@@ -185,8 +180,6 @@ def recommend_movies_content_based(user_id, top_n=10, min_watch_duration_seconds
 
     return recommended_movies[['slug', 'name', 'poster_url', 'thumb_url', 'year', 'genres_slugs', 'similarity']].to_dict(orient='records')
 
-
-# --- Tải dữ liệu phim đã làm giàu một lần khi API khởi động ---
 print("API: Khởi tạo tải dữ liệu phim khi API khởi động...")
 load_movies_from_firestore_and_build_model(collection_name='enrichedMovies')
 
@@ -197,7 +190,7 @@ def home():
     return "API Gợi ý phim đang hoạt động!"
 
 @app.route('/recommend', methods=['POST'])
-def get_recommendations_api(): # <-- Định nghĩa đúng một lần duy nhất
+def get_recommendations_api():
     user_id = request.json.get('userId')
     if not user_id:
         return jsonify({"error": "Cần có userId để gợi ý phim. Vui lòng đăng nhập."}), 400
@@ -213,7 +206,3 @@ def get_recommendations_api(): # <-- Định nghĩa đúng một lần duy nhấ
     
     recommendations = recommend_movies_content_based(user_id, top_n=10)
     return jsonify({"recommendations": recommendations})
-
-# Dòng này không cần thiết khi triển khai lên Render.com (hoặc Cloud Run) vì Gunicorn sẽ quản lý cổng
-# if __name__ == '__main__':
-#     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
