@@ -188,7 +188,22 @@ load_movies_from_firestore_and_build_model(collection_name='enrichedMovies')
 @app.route('/')
 def home():
     return "API Gợi ý phim đang hoạt động!"
-
+    
+# --- Endpoint Health Check để chống ngủ đông ---
+@app.route('/healthcheck', methods=['GET'])
+def health_check():
+    try:
+        # Kiểm tra nhanh xem dữ liệu đã load chưa
+        status = "Ready" if not ALL_MOVIES_DF.empty else "Loading Data..."
+        return jsonify({
+            "status": status,
+            "timestamp": datetime.now().isoformat(),
+            "message": "Server is awake and breathing!"
+        }), 200
+    except Exception as e:
+        return jsonify({"status": "Error", "error": str(e)}), 500
+        
+# --- Endpoint Recommend ---
 @app.route('/recommend', methods=['POST'])
 def get_recommendations_api():
     user_id = request.json.get('userId')
